@@ -1,7 +1,7 @@
 # models and serializer
 from .models import BlogsPage,Comment
 from user.models import User
-from .serializer import BlogPageSerializer,BlogPageAndCommentSerializer,CommentSerializer
+from .serializer import BlogPageSerializer,GetCommentSerializer,PostCommentSerializer
 
 # imports from rest_framework
 from rest_framework import status
@@ -17,6 +17,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
 
+
 # Create your views here.
 
 class BlogView(RetrieveAPIView):
@@ -30,16 +31,13 @@ class BlogView(RetrieveAPIView):
     @method_decorator(csrf_exempt)
     def get(self,request):
         blogs = BlogsPage.objects.live()
-        print(blogs)
         blog = BlogPageSerializer(blogs,many=True)
-        print(blog.data)
         return Response(blog.data)
         # serializer = BlogSerializer(blog,many=True)
 
 class BlogAndCommentView(RetrieveAPIView):
 
     permission_classes = [AllowAny]
-    serializer_class = BlogPageAndCommentSerializer
     
     @swagger_auto_schema(
         responses={204: "No Content"},
@@ -48,17 +46,19 @@ class BlogAndCommentView(RetrieveAPIView):
 
     def get(self,request,blogID):
         blog = BlogsPage.objects.live().get(id = blogID)
-        blog = BlogPageAndCommentSerializer(blog)
-        return Response(blog.data)
+        comments = Comment.objects.filter(blog = blogID)
+        blog = BlogPageSerializer(blog)
+        comment = GetCommentSerializer(comments, many = True)
+        return Response({'blog': blog.data,'comment': comment.data},status=200)
 
 class CreateCommentView(CreateAPIView):
-   
+
     permission_class = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
-    serializer_class = CommentSerializer
+    serializer_class = PostCommentSerializer
 
     @swagger_auto_schema(
-        request_body = CommentSerializer,
+        request_body = PostCommentSerializer,
         responses={204: "No Content"},
     )
     @method_decorator(csrf_exempt)
@@ -66,9 +66,11 @@ class CreateCommentView(CreateAPIView):
     def post(self,request):
         user = request.user
         username = user.username
+        blog = BlogsPage.objects.live().get(id = request.data.get('blog'))
         if user.is_authenticated:
-            print(username,"username yeri ho ")
-            serializer = CommentSerializer(data= request.data,context= {'username': username})
+            print(request.data,"data in requesst")
+            serializer = PostCommentSerializer(data= request.data,context= {'username': username,'blog':blog})
+            print(serializer)
             if serializer.is_valid():
                 serializer.save()
                 return Response({'msg':'comment has been posted'})
@@ -78,10 +80,9 @@ class CreateCommentView(CreateAPIView):
 class UpdateCommentView(PutAPIView):
     authentication_classes = [JWTAuthentication]
     permission_class = [IsAuthenticated]
-    serializer_class = CommentSerializer
-    
+    serializer_class = PostCommentSerializer
     @swagger_auto_schema(
-        request_body = CommentSerializer,
+        request_body = PostCommentSerializer,
         responses={204: "No Content"},
     )
     @method_decorator(csrf_exempt)    
@@ -93,7 +94,7 @@ class UpdateCommentView(PutAPIView):
         if comment.username != user.username:
             return Response({'msg':'You cannot modify this content'})
         
-        serializer = CommentSerializer(instance= comment,data=request.data)
+        serializer = PostCommentSerializer(instance= comment,data=request.data)
         
         if serializer.is_valid():
             serializer.save()

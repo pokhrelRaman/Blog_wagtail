@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     
     'wagtail.contrib.forms',
     'wagtail.contrib.redirects',
+    'wagtail.contrib.modeladmin',
     'wagtail.embeds',
     'wagtail.sites',
     'wagtail.users',
@@ -224,15 +225,18 @@ MEDIA_URL = '/media/'
 SWAGGER_SETTINGS = {
     "DEFAULT_MODEL_RENDERING": "example",
     'SECURITY_DEFINITIONS': {
-        'Basic': {
-            'type': 'basic'
-        },
         'Bearer': {
             'type': 'apiKey',
             'name': 'Authorization',
             'in': 'header'
         }
     }
+}
+
+WAGTAILSEARCH_BACKENDS = {
+    'default': {
+        'BACKEND': 'wagtail.search.backends.db',
+    },
 }
 
 # SWAGGER_SETTINGS = {
