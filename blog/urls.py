@@ -14,6 +14,8 @@ from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
+from search import views as search_views
+
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -36,5 +38,7 @@ urlpatterns = [
    path('wagtail_admin/', include(wagtailadmin_urls)),
    path('documents/', include(wagtaildocs_urls)),
    path('pages/', include(wagtail_urls)),
+   path("search/", search_views.search, name="search"),
+   path('search/',include('search.urls')),
    path('', include(wagtail_urls)),
 ] +  static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

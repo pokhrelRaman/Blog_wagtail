@@ -10,32 +10,37 @@ from wagtail.models import Comment
 from wagtail.api import APIField
 from wagtail.models import Orderable
 from wagtail.fields import RichTextField
+
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 
-from wagtail.contrib.routable_page.models import route
+from taggit.models import TaggedItemBase
+from modelcluster.contrib.taggit import ClusterTaggableManager
+
 from wagtail.search import index
 
 def upload_to(instance,filename):
     return 'blog/thumbnail/images{filename}'.format(filename=filename)
 
-@route('')
+
+# @route(r'^search/$')
+
+class BlogTag(TaggedItemBase):
+    content_object = ParentalKey('Blog', related_name='blog_tag', on_delete=models.CASCADE)
 
 
 class BlogsPage(Page):
-    # max_count = 1
     content_panels = Page.content_panels + [
         InlinePanel('blog', label= 'New Blog'),
     ]
 
-class Blog(Orderable):
-    max_count = 1 
+class Blog(Orderable,ClusterableModel):
     page = ParentalKey('BlogsPage', on_delete=models.CASCADE,
                        related_name='blog', null=True)
     author = models.CharField(null=True,max_length=20)
     content = RichTextField(null=True,max_length=2000)
     category = models.CharField(max_length=20,blank=True,null=False)
-    tags = models.CharField(max_length=20,blank=True,null=False)
+    tags = ClusterTaggableManager(through= BlogTag, blank=True)
     thumbnail = models.ImageField(upload_to= upload_to, null = True, default= "") 
     
 
@@ -47,14 +52,23 @@ class Blog(Orderable):
         APIField('thumbnail'),
     ]
 
-    search_fields = Page.search_fields + [
-        index.SearchField('author'),
-        index.SearchField('category'),
-        index.SearchField('tags'),
+    # search_fields = Page.search_fields + [
+    #     index.SearchField('author'),
+    #     index.SearchField('category'),
+    #     index.SearchField('tags'),
+    # ]
+
+    search_fields = [
+        index.SearchField('author',  AutocompleteField=True),
+        index.SearchField('category',  AutocompleteField=True),
+        index.SearchField('tags',  AutocompleteField=True),
+        index.SearchField('content', AutocompleteField=True),
     ]
+
 
     def __str__(self):
         return self.author
+
 
 
 
@@ -80,9 +94,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.username
-    
-
-class CommentPage(Comment):
-     content_panels = Page.content_panels + [
-    InlinePanel('comment', label= 'New Comment'),
-    ]

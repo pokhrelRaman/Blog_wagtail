@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'wagtail.contrib.search_promotions',
     
     'wagtail.contrib.forms',
     'wagtail.contrib.redirects',
@@ -72,6 +73,7 @@ INSTALLED_APPS = [
     
     'user',
     'blogmain',
+    'search',
 ]
 
 
@@ -233,10 +235,12 @@ SWAGGER_SETTINGS = {
     }
 }
 
+
+
 WAGTAILSEARCH_BACKENDS = {
-    'default': {
-        'BACKEND': 'wagtail.search.backends.db',
-    },
+    "default": {
+        "BACKEND": "wagtail.search.backends.database",
+    }
 }
 
 # SWAGGER_SETTINGS = {

@@ -1,0 +1,17 @@
+# from .models import UserProfile
+# from wagtail.contrib.modeladmin.options import (
+#     ModelAdmin, modeladmin_register,
+# )
+
+
+# class UserAdmin(ModelAdmin):
+#     model = UserProfile
+#     menu_label = 'Users'
+#     menu_order = 3000
+#     menu_icon = 'comment'
+#     add_to_settings_menu = False
+#     exclude_from_explorer = False
+#     list_display = ('id', 'first_name','last_name', 'email','profilePicture','personalInformation')
+#     search_fields = ('email')
+
+# modeladmin_register(UserAdmin)

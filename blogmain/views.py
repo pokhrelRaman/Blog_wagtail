@@ -1,7 +1,7 @@
 # models and serializer
 from .models import BlogsPage,Comment
 from user.models import User
-from .serializer import BlogPageSerializer,GetCommentSerializer,PostCommentSerializer
+from .serializers import BlogPageSerializer,GetCommentSerializer,PostCommentSerializer
 
 # imports from rest_framework
 from rest_framework import status

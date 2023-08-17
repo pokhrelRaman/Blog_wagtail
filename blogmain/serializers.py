@@ -1,5 +1,6 @@
 from rest_framework  import serializers
 from .models import BlogsPage,Comment,Blog
+from taggit.models import Tag
 
 
 class PostCommentSerializer(serializers.ModelSerializer):
@@ -19,28 +20,27 @@ class PostCommentSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class GetCommentSerializer(serializers.ModelSerializer):
-    
+class GetCommentSerializer(serializers.ModelSerializer): 
     class Meta:
         model = Comment
         fields = '__all__'
 
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['name']
+
+
 class BlogSerializer(serializers.ModelSerializer):
     thumbnail = serializers.ImageField()
+    tags = TagSerializer(many=True)
     class Meta:
         model =  Blog
-        fields = ['author','content','page','id','thumbnail']
+        fields = ['author','content','page','id','thumbnail','tags','category']
 
 class BlogPageSerializer(serializers.ModelSerializer):
     blog = BlogSerializer(many=True)
     class Meta:
         model = BlogsPage
-        fields = ['blog','id'] 
-   
-# class BlogPageAndCommentSerializer(serializers.ModelSerializer):
-#     blog = BlogSerializer(many=True)
-#     comment = CommentSerializer(many=True)
-#     class Meta:
-#         model = BlogsPage
-#         fields = ['blog','comment']
+        fields = ['blog','id','title'] 

@@ -176,3 +176,21 @@ class LogoutView(CreateAPIView):
 
 
 #  register, verify ,  update , resetpassword, change password , login , logout
+
+
+class UserProfile(CreateAPIView):
+    def create(self,request):
+        user = request.user
+        serializer = UserProfileSerializer(data=request.data,context = {'user':user})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'user profile created'},status=status.HTTP_201_CREATED)
+        return  Response({'message': 'invalid serializer'},status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self,request):
+        profile = get_object_or_404(UserProfile,user = request.user)
+        serializer = UserProfileSerializer(instance= profile,data= request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return  Response({'message': 'user profile updated'},status=status.HTTP_200_OK)
+        return  Response({'message': 'invalid serializer'},status=status.HTTP_400_BAD_REQUEST)

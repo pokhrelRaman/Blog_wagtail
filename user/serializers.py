@@ -2,23 +2,39 @@ from .models import UserProfile
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.ReadOnlyField()
+    class Meta:
+        model = User
+        fields = ['first_name','last_name','username']
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
     profilePicture = serializers.ImageField(required = False)
+    user = UserSerializer(many=True)
     class Meta:
         model = UserProfile
         fields = ['id','user','profilePicture','personalInformation']
     
-    def create():
-        pass
+    def create(self,data):
+        userProfile = UserProfile.objects.create(
+                                                    user = self.context.get('user'),
+                                                    profilePicture = data.get('profilePicture'),
+                                                    personalInformation = data.get('personalInformation')
+                                                )
+        return userProfile
 
-    def update():
-        pass
+    def update(self,instance,data):
+        instance.profilePicture
+        instance.personalInformation
+        return instance
+
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('first_name','last_name','username','email','password')
+        fields = ['first_name','last_name','username','email','password']
 
     def create(self,data):
         user = User.objects.create(
